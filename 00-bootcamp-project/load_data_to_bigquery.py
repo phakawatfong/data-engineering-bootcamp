@@ -80,18 +80,25 @@ table = client.get_table(table_id)
 print(f"Loaded {table.num_rows} rows and {len(table.schema)} columns to {table_id}")
 
 
-# orders 
+# orders
 job_config = bigquery.LoadJobConfig(
-    skip_leading_rows = 1,
-    write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE,
-    source_format = bigquery.SourceFormat.CSV,
+    skip_leading_rows=1,
+    write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,
+    source_format=bigquery.SourceFormat.CSV,
     autodetect=True,
+    time_partitioning=bigquery.TimePartitioning(
+        type_=bigquery.TimePartitioningType.DAY,
+        field="created_at",
+    ),
 )
-
 data = "orders"
+# order_list_partition=['2021-02-10','2021-02-11']
+partition = '2021-02-10'
+partition = dt.replace("-", "")
+# for partition in order_list_partition:
 file_path = f"{DATA_FOLDER}/{data}.csv"
 with open(file_path, "rb") as f:
-    table_id = f"{project_id}.deb_bootcamp.{data}"
+    table_id = f"{project_id}.deb_bootcamp.{data}${partition}"
     job = client.load_table_from_file(f, table_id, job_config=job_config)
     job.result()
 
@@ -149,7 +156,7 @@ job_config = bigquery.LoadJobConfig(
     ),
 )
 
-dt = "2021-10-23"
+dt = "2020-10-23"
 partition = dt.replace("-", "")
 data = "users"
 file_path = f"{DATA_FOLDER}/{data}.csv"
